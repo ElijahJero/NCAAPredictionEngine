@@ -39,8 +39,6 @@ def get_team_stats(team_id: str) -> dict:
     r.raise_for_status()
     data = r.json()
 
-    print(data)
-
     stats: dict[str, float] = {}
 
     # The response shape is: data["results"]["stats"]["categories"][*]["stats"][*]
