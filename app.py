@@ -35,7 +35,7 @@ class NCAAApp(tk.Tk):
         self.results: dict[str, int] = {}
         self.sim_runs = tk.IntVar(value=2000)
         self.noise_var = tk.DoubleVar(value=1.0)
-        self.team_limit = tk.IntVar(value=64)
+        self.team_limit = tk.IntVar(value=500)
         self.loading = False
 
         # Per-weight controls: {label: (weight_var, enabled_var)}
@@ -118,7 +118,7 @@ class NCAAApp(tk.Tk):
                         lambda e: canvas.yview_scroll(-1 * (e.delta // 120), "units"))
 
         self._section(inner, "⚙  Simulation Settings")
-        self._setting_row(inner, "Teams to Load:", self.team_limit, 16, 351, 1)
+        self._setting_row(inner, "Teams to Load:", self.team_limit, 16, 500, 1)
         self._setting_row(inner, "Monte Carlo Runs:", self.sim_runs, 100, 10000, 100)
         self._noise_row(inner)
 

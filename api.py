@@ -4,15 +4,47 @@ from constants import TEAM_LIST_URL
 
 
 def get_teams(limit: int = 64) -> list[dict]:
-    r = requests.get(TEAM_LIST_URL, timeout=15)
-    r.raise_for_status()
-    teams_raw = r.json()["sports"][0]["leagues"][0]["teams"]
-    out = []
-    for t in teams_raw[:limit]:
-        team = t["team"]
-        out.append({"id": team["id"], "name": team["displayName"],
-                    "abbreviation": team.get("abbreviation", ""),
-                    "color": f"#{team.get('color', '888888')}"})
+    """
+    Fetch the complete list of NCAA men's basketball teams by paginating
+    through ESPN's teams endpoint.  The API limits results per page, so we
+    keep requesting incremental pages until one returns an empty team list.
+
+    Args:
+        limit: Maximum number of teams to return.  Pass a large value (e.g.
+               500) to retrieve every available team.
+
+    Returns:
+        A list of team dicts, each with keys: id, name, abbreviation, color.
+    """
+    seen_ids: set[str] = set()
+    out: list[dict] = []
+    page = 1
+
+    while True:
+        r = requests.get(TEAM_LIST_URL, params={"page": page}, timeout=15)
+        r.raise_for_status()
+        teams_raw = r.json()["sports"][0]["leagues"][0]["teams"]
+
+        if not teams_raw:
+            break
+
+        for t in teams_raw:
+            team = t["team"]
+            team_id = team["id"]
+            if team_id in seen_ids:
+                continue
+            seen_ids.add(team_id)
+            out.append({
+                "id":           team_id,
+                "name":         team["displayName"],
+                "abbreviation": team.get("abbreviation", ""),
+                "color":        f"#{team.get('color', '888888')}",
+            })
+            if len(out) >= limit:
+                return out
+
+        page += 1
+
     return out
 
 
