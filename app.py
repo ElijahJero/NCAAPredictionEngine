@@ -387,7 +387,9 @@ class NCAAApp(tk.Tk):
 
         tk.Label(top, text="Team A:", bg=DARK_BG, fg=FG,
                  font=("Segoe UI", 11)).grid(row=0, column=0, sticky="w", padx=6)
-        self.matchup_a = ttk.Combobox(top, width=30, state="readonly")
+        self.matchup_a = ttk.Combobox(top, width=30, state="normal")
+        self.matchup_a.bind("<KeyRelease>",
+                            lambda e: self._filter_matchup_combo(self.matchup_a))
         self.matchup_a.grid(row=0, column=1, padx=8)
 
         tk.Label(top, text="VS", bg=DARK_BG, fg=ACCENT2,
@@ -395,7 +397,9 @@ class NCAAApp(tk.Tk):
 
         tk.Label(top, text="Team B:", bg=DARK_BG, fg=FG,
                  font=("Segoe UI", 11)).grid(row=0, column=3, sticky="w", padx=6)
-        self.matchup_b = ttk.Combobox(top, width=30, state="readonly")
+        self.matchup_b = ttk.Combobox(top, width=30, state="normal")
+        self.matchup_b.bind("<KeyRelease>",
+                            lambda e: self._filter_matchup_combo(self.matchup_b))
         self.matchup_b.grid(row=0, column=4, padx=8)
 
         tk.Label(top, text="Simulations:", bg=DARK_BG, fg=FG,
@@ -875,6 +879,15 @@ class NCAAApp(tk.Tk):
                 self.teams_tree.reattach(row, "", "end")
             else:
                 self.teams_tree.detach(row)
+
+    def _filter_matchup_combo(self, combo: ttk.Combobox):
+        """Filter the matchup combobox dropdown to teams matching the typed text."""
+        query = combo.get().lower()
+        all_names = [t["name"] for t in self.teams]
+        filtered = [n for n in all_names if query in n.lower()] if query else all_names
+        combo["values"] = filtered
+        if filtered:
+            combo.event_generate("<Down>")
 
     # ── Matchup Simulation ───────────────────────────────────────────────────
 
